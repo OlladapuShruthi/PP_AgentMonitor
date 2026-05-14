@@ -253,11 +253,25 @@ async def health():
 async def login(request: LoginRequest):
     """Authenticate user and return JWT token"""
     try:
-        print(f"Login attempt - Username: {request.username}, Password length: {len(request.password)}")
-        user = db.verify_user(request.username, request.password)
-        print(f"User found: {user is not None}")
+        print(f"🔵 Login attempt - Username: {request.username}, Password length: {len(request.password)}")
+        
+        # Check if user exists first
+        user = db.users.find_one({"username": request.username})
         if not user:
+            print(f"❌ User not found: {request.username}")
             raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Check password
+        hashed_input = db.hash_password(request.password)
+        stored_hash = user.get("password", "")
+        
+        if hashed_input != stored_hash:
+            print(f"❌ Password mismatch for {request.username}")
+            print(f"   Input hash: {hashed_input[:20]}...")
+            print(f"   Stored hash: {stored_hash[:20]}...")
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        print(f"✅ Login successful: {request.username}")
         token = create_token(user["username"], user["role"])
         return {"token": token, "username": user["username"], "role": user["role"]}
     except HTTPException:
@@ -270,19 +284,23 @@ async def login(request: LoginRequest):
 async def register(request: RegisterRequest):
     """Register new user and return JWT token"""
     try:
+        print(f"🔵 Register attempt - Username: {request.username}")
         # Check if user already exists
         existing = db.users.find_one({"username": request.username})
         if existing:
+            print(f"❌ User already exists: {request.username}")
             raise HTTPException(status_code=400, detail="Username already exists")
         
         # Create new user
+        hashed_pwd = db.hash_password(request.password)
         new_user = {
             "username": request.username,
-            "password": db.hash_password(request.password),
+            "password": hashed_pwd,
             "role": request.role if request.role in ["user", "admin"] else "user",
             "created_at": datetime.now()
         }
-        db.users.insert_one(new_user)
+        result = db.users.insert_one(new_user)
+        print(f"✅ User registered: {request.username} (ID: {result.inserted_id})")
         
         # Create token for immediate login
         token = create_token(new_user["username"], new_user["role"])
