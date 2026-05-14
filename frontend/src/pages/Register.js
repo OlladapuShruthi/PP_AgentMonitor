@@ -10,6 +10,9 @@ function Register({ onLogin }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  
+  // Use environment variable for API URL
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,7 +31,7 @@ function Register({ onLogin }) {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/register', {
+      const response = await axios.post(`${API_BASE_URL}/api/register`, {
         username,
         password
       });
