@@ -1,10 +1,25 @@
 # AgentMonitor - Simple Startup Script
-# ADD YOUR GEMINI API KEY HERE
-$GEMINI_API_KEY = "AIzaSyCALdYnS-PTEo_kumar9NUtKpkxipfOoCE"
+# API keys are loaded from backend/.env file (DO NOT hardcode keys here)
 
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $backendDir = Join-Path $projectRoot "backend"
 $frontendDir = Join-Path $projectRoot "frontend"
+$envFile = Join-Path $backendDir ".env"
+
+# Load .env file if it exists
+if (Test-Path $envFile) {
+    Get-Content $envFile | ForEach-Object {
+        if ($_ -match '^\s*([^#=]+)=(.*)$') {
+            $name = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            [Environment]::SetEnvironmentVariable($name, $value, "Process")
+        }
+    }
+    Write-Host "✅ Loaded environment variables from .env" -ForegroundColor Green
+} else {
+    Write-Host "⚠️  WARNING: .env file not found at $envFile" -ForegroundColor Yellow
+    Write-Host "   Please create it with your API keys" -ForegroundColor Yellow
+}
 
 Write-Host ""
 Write-Host "Starting AgentMonitor..." -ForegroundColor Green
@@ -31,7 +46,6 @@ Write-Host ""
 # Start Backend
 Write-Host "Starting Backend (port 5000)..." -ForegroundColor Cyan
 $backendScript = @"
-`$env:GEMINI_API_KEY = "$GEMINI_API_KEY"
 Set-Location "$backendDir"
 python.exe -c "import uvicorn; from app import app; uvicorn.run(app, host='0.0.0.0', port=5000, log_level='info')"
 "@
