@@ -24,6 +24,11 @@ export const login = async (username, password) => {
   return response.data;
 };
 
+export const register = async (username, password) => {
+  const response = await api.post('/register', { username, password });
+  return response.data;
+};
+
 export const runMAS = async (task, code = '', language = 'auto', use_full_mas = false) => {
   const response = await api.post('/run-mas', { task, code, language, use_full_mas });
   return response.data;

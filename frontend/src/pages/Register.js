@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { register } from '../api';
 import './Login.css';
 
 function Register({ onLogin }) {
@@ -10,9 +10,6 @@ function Register({ onLogin }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  
-  // Use environment variable for API URL
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,11 +28,8 @@ function Register({ onLogin }) {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/register`, {
-        username,
-        password
-      });
-      onLogin(response.data);
+      const data = await register(username, password);
+      onLogin(data);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.detail || 'Registration failed');

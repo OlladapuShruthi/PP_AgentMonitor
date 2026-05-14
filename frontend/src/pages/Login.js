@@ -20,7 +20,7 @@ function Login({ onLogin }) {
       onLogin(data);
       navigate(data.role === 'admin' ? '/admin-dashboard' : '/dashboard');
     } catch (err) {
-      setError('Invalid username or password');
+      setError(err.response?.data?.detail || 'Invalid username or password');
     } finally {
       setLoading(false);
     }

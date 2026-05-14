@@ -10,10 +10,16 @@ import AdminPromptDetail from './pages/AdminPromptDetail';
 import AdminAnalytics from './pages/AdminAnalytics';
 
 function App() {
-  const [user, setUser] = React.useState(null);
-
-  // Removed auto-login from localStorage to prevent automatic login on page reload
-  // Users will need to login each time they open the application
+  const [user, setUser] = React.useState(() => {
+    // Initialize user from sessionStorage if available
+    const token = sessionStorage.getItem('token');
+    const username = sessionStorage.getItem('username');
+    const role = sessionStorage.getItem('role');
+    if (token && username && role) {
+      return { token, username, role };
+    }
+    return null;
+  });
 
   const handleLogin = (userData) => {
     // Store in sessionStorage instead of localStorage
