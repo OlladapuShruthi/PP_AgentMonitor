@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use environment variable for API URL (for Render deployment)
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 const API_URL = `${API_BASE_URL}/api`;
 
 const api = axios.create({
