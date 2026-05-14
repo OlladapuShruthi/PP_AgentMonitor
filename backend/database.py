@@ -11,7 +11,8 @@ load_dotenv()
 class Database:
     def __init__(self, connection_string=None):
         if connection_string is None:
-            connection_string = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+            # Try MONGO_URI first (production), fall back to MONGODB_URI (backward compat), then localhost
+            connection_string = os.getenv("MONGO_URI") or os.getenv("MONGODB_URI") or "mongodb://localhost:27017/"
         
         self.client = MongoClient(connection_string)
         db_name = os.getenv("DATABASE_NAME", "agentmonitor")
